@@ -6,7 +6,8 @@ import data_extraction
 from numpy.random import randn
 from math import sqrt
 
-class FullyConnectedNeuralNet:
+
+class FullyConnectedNeuralNetwork:
     def __init__(self):
         self.learnin_rate = 0.00001
         self.layers = []
@@ -33,12 +34,7 @@ class FullyConnectedNeuralNet:
         predicted_result = np.where(output_layer == output_layer.max())[0][0] + 1
         print(f"expected: {correct_result} got: {predicted_result}\n")
         return output_layer 
-       # hidden1 = np.dot(input_layer, self.weights[0])
-       # hidden1 = np.vectorize(self.RelU)(hidden1)
-       # hidden2 = np.dot(hidden1, self.weights[1])
-       # hidden2 = np.vectorize(self.RelU)(hidden2)
-       # output = np.dot(hidden2, self.weights[2])
-    
+   
     def back_propagation(self, output_layer, correct_result):
         correct_output = np.zeros(10)
         correct_output[correct_result - 1] = 1
@@ -64,7 +60,7 @@ def main():
     results = data_extractor.get_results_column()
     results = results.to_numpy()
 
-    NN = FullyConnectedNeuralNet()
+    NN = FullyConnectedNeuralNetwork()
     NN.create_layer(input_layer_size)
     NN.create_layer(2500)
     NN.create_layer(1536)
@@ -74,7 +70,12 @@ def main():
 
 main()
 
-
+       # hidden1 = np.dot(input_layer, self.weights[0])
+       # hidden1 = np.vectorize(self.RelU)(hidden1)
+       # hidden2 = np.dot(hidden1, self.weights[1])
+       # hidden2 = np.vectorize(self.RelU)(hidden2)
+       # output = np.dot(hidden2, self.weights[2])
+ 
 # first_hidden_layer = 2500 neurons
 # second_hidden_layer = 1536 neurons
 # results_layer = 10
