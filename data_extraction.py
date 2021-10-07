@@ -15,4 +15,5 @@ class ExtractTrainData:
         return self.train_data.iloc[:, 1:]
 
     def get_num_of_columns(self):
-        return len(self.get_train_data().columns)  
+        return len(self.get_train_data().columns) 
+        

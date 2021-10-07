@@ -9,18 +9,41 @@ from math import sqrt
 class FullyConnectedNeuralNet:
     def __init__(self):
         self.learnin_rate = 0.00001
-        self.hidden_layers  = []
+        self.layers = []
+        self.layers_size  = []
         self.weights = [] 
    
     def create_layer(self, num_of_neurons):
-        self.hidden_layers.append(num_of_neurons)     
-    
+        self.layers_size.append(num_of_neurons)     
+
     def weights_init(self):
-        hidden_layers = self.hidden_layers
-        input_to_hidden1 = randn(hidden_layers[0], hidden_layers[1]) * sqrt(2 / hidden_layers[0])   
-        hidden1_to_hidden2 = randn(hidden_layers[1], hidden_layers[2]) * sqrt(2 / hidden_layers[1])
-        hidden2_to_output = randn(hidden_layers[2], hidden_layers[3]) * sqrt(2 / hidden_layers[2])
-        self.weights = [input_to_hidden1, hidden1_to_hidden2, hidden2_to_output]
+        layers_size = self.layers_size
+        for i in range(0, len(layers_size) - 1):
+            weight = randn(layers_size[i], layers_size[i+1]) * sqrt(2 / layers_size[i])
+            self.weights.append(weight)
+
+    def feed_forward(self, input_layer, correct_result):
+        self.layers.append(input_layer)
+        for i in range(0, len(self.layers_size) - 1):
+            next_layer = np.dot(self.layers[i], self.weights[i])
+            if i <  len(self.layers_size) - 2: 
+                next_layer = np.vectorize(self.RelU)(next_layer)
+            self.layers.append(next_layer) 
+        output_layer = self.layers[len(self.layers_size) - 1]
+        predicted_result = np.where(output_layer == output_layer.max())[0][0] + 1
+        print(f"expected: {correct_result} got: {predicted_result}\n")
+        return output_layer 
+       # hidden1 = np.dot(input_layer, self.weights[0])
+       # hidden1 = np.vectorize(self.RelU)(hidden1)
+       # hidden2 = np.dot(hidden1, self.weights[1])
+       # hidden2 = np.vectorize(self.RelU)(hidden2)
+       # output = np.dot(hidden2, self.weights[2])
+    
+    def back_propagation(self, output_layer, correct_result):
+        correct_output = np.zeros(10)
+        correct_output[correct_result - 1] = 1
+        error_output = correct_output - output_layer 
+        pass 
 
     def change_weights(self, new_weights):
         self.weights = new_weights
@@ -36,13 +59,18 @@ class FullyConnectedNeuralNet:
 def main():
     data_extractor = data_extraction.ExtractTrainData('data/train.csv')
     train_data = data_extractor.get_train_data()
+    train_data = train_data.to_numpy()
     input_layer_size = data_extractor.get_num_of_columns()
+    results = data_extractor.get_results_column()
+    results = results.to_numpy()
+
     NN = FullyConnectedNeuralNet()
     NN.create_layer(input_layer_size)
     NN.create_layer(2500)
     NN.create_layer(1536)
     NN.create_layer(10)
     NN.weights_init()
+    NN.feed_forward(train_data[0], results[0])
 
 main()
 
