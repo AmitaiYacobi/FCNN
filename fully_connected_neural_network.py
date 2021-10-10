@@ -46,7 +46,8 @@ class FullyConnectedNeuralNetwork:
         error_output = correct_output - output_layer 
         pass 
 
-    def train(self):
+    def train(self, input_layer, correct_results):
+        
         pass
         
     def RelU(self, number):
