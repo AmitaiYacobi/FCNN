@@ -23,6 +23,9 @@ class FullyConnectedNeuralNetwork:
             weight = randn(layers_size[i], layers_size[i+1]) * sqrt(2 / layers_size[i])
             self.weights.append(weight)
 
+    def change_weights(self, new_weights):
+        self.weights = new_weights
+    
     def feed_forward(self, input_layer, correct_result):
         self.layers.append(input_layer)
         for i in range(0, len(self.layers_size) - 1):
@@ -36,14 +39,16 @@ class FullyConnectedNeuralNetwork:
         return output_layer 
    
     def back_propagation(self, output_layer, correct_result):
+        # add counter for accuracy and apdate it every iteration in the epoch. After every epoch, calculate the accuracy of the epoch and write it to a file.
+        # after every epoch write the final weights of the epoch to a seperated file so it will be possible to use them later (in prediction).
         correct_output = np.zeros(10)
         correct_output[correct_result - 1] = 1
         error_output = correct_output - output_layer 
         pass 
 
-    def change_weights(self, new_weights):
-        self.weights = new_weights
-
+    def train(self):
+        pass
+        
     def RelU(self, number):
         if number > 0:
             return number
