@@ -1,6 +1,7 @@
+import os
 import pandas as pd
 import numpy as np
-import data_extraction
+import extract_train_data
 
 
 from numpy.random import randn
@@ -11,11 +12,12 @@ class FullyConnectedNeuralNetwork:
     def __init__(self):
         self.learnin_rate = 0.00001
         self.layers = []
-        self.layers_size  = []
-        self.weights = [] 
-   
+        self.layers_size = []
+        self.weights = []
+        self.counter = 0
+
     def create_layer(self, num_of_neurons):
-        self.layers_size.append(num_of_neurons)     
+        self.layers_size.append(num_of_neurons)
 
     def weights_init(self):
         layers_size = self.layers_size
@@ -25,30 +27,46 @@ class FullyConnectedNeuralNetwork:
 
     def change_weights(self, new_weights):
         self.weights = new_weights
-    
-    def feed_forward(self, input_layer, correct_result):
-        self.layers.append(input_layer)
+
+    def feed_forward(self, input_layer, target):
+        layers = []
+        layers.append(input_layer)
         for i in range(0, len(self.layers_size) - 1):
-            next_layer = np.dot(self.layers[i], self.weights[i])
-            if i <  len(self.layers_size) - 2: 
+            next_layer = np.dot(layers[i], self.weights[i])
+            if i < len(self.layers_size) - 2:
                 next_layer = np.vectorize(self.RelU)(next_layer)
-            self.layers.append(next_layer) 
-        output_layer = self.layers[len(self.layers_size) - 1]
+            layers.append(next_layer)
+        output_layer = layers[len(self.layers_size) - 1]
         predicted_result = np.where(output_layer == output_layer.max())[0][0] + 1
-        print(f"expected: {correct_result} got: {predicted_result}\n")
-        return output_layer 
-   
-    def back_propagation(self, output_layer, correct_result):
+        print(f"expected: {target} got: {predicted_result}\n")
+        if target == predicted_result:
+            self.counter += 1
+        return output_layer
+
+    def back_propagation(self, output_layer, target):
         # add counter for accuracy and apdate it every iteration in the epoch. After every epoch, calculate the accuracy of the epoch and write it to a file.
         # after every epoch write the final weights of the epoch to a seperated file so it will be possible to use them later (in prediction).
         correct_output = np.zeros(10)
-        correct_output[correct_result - 1] = 1
-        error_output = correct_output - output_layer 
-        pass 
-
-    def train(self, input_layer, correct_results):
-        
+        correct_output[target - 1] = 1
+        error_output = correct_output - output_layer
         pass
+
+    def train(self, train_data, targets, num_of_epochs=60):
+        i = 0
+        while (True):
+            i += 1
+            for j in range(0, len(train_data)):
+                output_layer = self.feed_forward(train_data[j], targets[j])
+                new_weights = self.back_propagation(output_layer, targets[j])
+                self.change_weights(new_weights)
+            epoch_accuracy = (self.counter / len(targets)) * 100
+            epoch_dir = f"epoch_{i}"
+            os.mkdir(epoch_dir)
+            output_file = open(f"{epoch_dir}\\output.txt", "w")
+            output_file.write(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
+            for k in range(0, self.weights):
+                self.weights[k].to_csv(f"{epoch_dir}\\layer_{k}_to_layer_{k+1}_weights.csv")
+            print(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
         
     def RelU(self, number):
         if number > 0:
@@ -57,9 +75,8 @@ class FullyConnectedNeuralNetwork:
             return 0
 
 
-
 def main():
-    data_extractor = data_extraction.ExtractTrainData('data/train.csv')
+    data_extractor = extract_train_data.ExtractTrainData('data/train.csv')
     train_data = data_extractor.get_train_data()
     train_data = train_data.to_numpy()
     input_layer_size = data_extractor.get_num_of_columns()
@@ -74,14 +91,15 @@ def main():
     NN.weights_init()
     NN.feed_forward(train_data[0], results[0])
 
+
 main()
 
-       # hidden1 = np.dot(input_layer, self.weights[0])
-       # hidden1 = np.vectorize(self.RelU)(hidden1)
-       # hidden2 = np.dot(hidden1, self.weights[1])
-       # hidden2 = np.vectorize(self.RelU)(hidden2)
-       # output = np.dot(hidden2, self.weights[2])
- 
+# hidden1 = np.dot(input_layer, self.weights[0])
+# hidden1 = np.vectorize(self.RelU)(hidden1)
+# hidden2 = np.dot(hidden1, self.weights[1])
+# hidden2 = np.vectorize(self.RelU)(hidden2)
+# output = np.dot(hidden2, self.weights[2])
+
 # first_hidden_layer = 2500 neurons
 # second_hidden_layer = 1536 neurons
 # results_layer = 10
@@ -91,8 +109,8 @@ main()
 #   - clone the data from the file to a pandas table - optional (I will check this out)
 # feed forward:
 #   - initial weights accoding to some weights initialization method
-#   - feed the layers with the row including the calculation of the 
-#     non-linear function. 
+#   - feed the layers with the row including the calculation of the
+#     non-linear function.
 #   - print the expected result and the current result.
 #   - keep the result (the layer of the result will be
 #     represented as 10 neourons)
@@ -101,8 +119,4 @@ main()
 #   - updtate the weights accordingly.
 #   - after finishing iterating the whole data, calculate the accuracy of the
 #     epoch and write it to a file.
-#   - 
-
-
-
-
+#   -
