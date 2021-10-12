@@ -49,10 +49,11 @@ class FullyConnectedNeuralNetwork:
         correct_output = np.zeros(10)
         correct_output[target - 1] = 1
         error_output = correct_output - output_layer
-        pass
+        print(error_output)
 
     def train(self, train_data, targets, num_of_epochs=60):
         i = 0
+        output_file = open("output.txt", "w")
         while (True):
             i += 1
             for j in range(0, len(train_data)):
@@ -62,7 +63,6 @@ class FullyConnectedNeuralNetwork:
             epoch_accuracy = (self.counter / len(targets)) * 100
             epoch_dir = f"epoch_{i}"
             os.mkdir(epoch_dir)
-            output_file = open(f"{epoch_dir}\\output.txt", "w")
             output_file.write(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
             for k in range(0, self.weights):
                 self.weights[k].to_csv(f"{epoch_dir}\\layer_{k}_to_layer_{k+1}_weights.csv")
@@ -89,8 +89,8 @@ def main():
     NN.create_layer(1536)
     NN.create_layer(10)
     NN.weights_init()
-    NN.feed_forward(train_data[0], results[0])
-
+    o = NN.feed_forward(train_data[0], results[0])
+    NN.back_propagation(o, results[0])
 
 main()
 
