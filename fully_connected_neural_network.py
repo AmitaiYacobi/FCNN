@@ -5,6 +5,8 @@ import extract_train_data
 
 
 from numpy.random import randn
+from numpy import savetxt
+from numpy import loadtxt
 from math import sqrt
 
 
@@ -53,8 +55,10 @@ class FullyConnectedNeuralNetwork:
 
     def train(self, train_data, targets, num_of_epochs=60):
         i = 0
+        self.weights_init()
         output_file = open("output.txt", "w")
         while (True):
+            self.counter = 0
             i += 1
             for j in range(0, len(train_data)):
                 output_layer = self.feed_forward(train_data[j], targets[j])
@@ -64,10 +68,21 @@ class FullyConnectedNeuralNetwork:
             epoch_dir = f"epoch_{i}"
             os.mkdir(epoch_dir)
             output_file.write(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
-            for k in range(0, self.weights):
-                self.weights[k].to_csv(f"{epoch_dir}\\layer_{k}_to_layer_{k+1}_weights.csv")
+            for k in range(0, len(self.weights)):
+                savetxt(f"{epoch_dir}\\layer_{k}_to_layer_{k+1}_weights.csv", self.weights[k], delimiter=',')
             print(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
-        
+   
+    def predict(self, validate_data, targets, epoch_dir):
+        weights = []
+        self.counter = 0
+        for i in range(0, len(self.weights)):
+            weights.append(loadtxt(f"{epoch_dir}\\layer_{i}_to_layer_{i+1}_weights.csv", self.weights[i], delimiter=','))
+        self.weights = weights
+        for j in range(0, len(validate_data)):
+            self.feed_forward(validate_data[j], targets[j])
+        accuracy = (self.counter / len(targets)) * 100
+        print(accuracy)
+
     def RelU(self, number):
         if number > 0:
             return number
@@ -89,8 +104,12 @@ def main():
     NN.create_layer(1536)
     NN.create_layer(10)
     NN.weights_init()
-    o = NN.feed_forward(train_data[0], results[0])
-    NN.back_propagation(o, results[0])
+    for k in range(0, len(NN.weights)):
+        print(NN.weights[k])
+        savetxt(f"layer_{k}_to_layer_{k+1}_weights.csv", NN.weights[k], delimiter=',')
+        print("######################################################################################################")
+        print(loadtxt(f"layer_{k}_to_layer_{k+1}_weights.csv", delimiter=',')) 
+
 
 main()
 

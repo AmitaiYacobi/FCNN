@@ -1,4 +1,6 @@
 __pycache__
 *.docx
+*.csv
+*.txt
 data/
 .DS_Store
