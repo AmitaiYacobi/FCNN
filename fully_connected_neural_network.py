@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-import extract_train_data
+import data_handler
 
 
 from numpy.random import randn
@@ -45,7 +45,7 @@ class FullyConnectedNeuralNetwork:
             self.counter += 1
         return output_layer
 
-    def back_propagation(self, output_layer, target):
+    def back_propagation(self, output_layer, target, learning_rate):
         # add counter for accuracy and apdate it every iteration in the epoch. After every epoch, calculate the accuracy of the epoch and write it to a file.
         # after every epoch write the final weights of the epoch to a seperated file so it will be possible to use them later (in prediction).
         correct_output = np.zeros(10)
@@ -53,7 +53,7 @@ class FullyConnectedNeuralNetwork:
         error_output = correct_output - output_layer
         print(error_output)
 
-    def train(self, train_data, targets, num_of_epochs=60):
+    def train(self, train_data, targets, num_of_epochs=60, learning_rate):
         i = 0
         self.weights_init()
         output_file = open("output.txt", "w")
@@ -62,15 +62,15 @@ class FullyConnectedNeuralNetwork:
             i += 1
             for j in range(0, len(train_data)):
                 output_layer = self.feed_forward(train_data[j], targets[j])
-                new_weights = self.back_propagation(output_layer, targets[j])
+                new_weights = self.back_propagation(output_layer, targets[j], learning_rate)
                 self.change_weights(new_weights)
             epoch_accuracy = (self.counter / len(targets)) * 100
             epoch_dir = f"epoch_{i}"
             os.mkdir(epoch_dir)
             output_file.write(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
+            print(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
             for k in range(0, len(self.weights)):
                 savetxt(f"{epoch_dir}\\layer_{k}_to_layer_{k+1}_weights.csv", self.weights[k], delimiter=',')
-            print(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
    
     def predict(self, validate_data, targets, epoch_dir):
         weights = []
@@ -91,7 +91,7 @@ class FullyConnectedNeuralNetwork:
 
 
 def main():
-    data_extractor = extract_train_data.ExtractTrainData('data/train.csv')
+    data_extractor = data_handler.ExtractTrainData('data/train.csv')
     train_data = data_extractor.get_train_data()
     train_data = train_data.to_numpy()
     input_layer_size = data_extractor.get_num_of_columns()
