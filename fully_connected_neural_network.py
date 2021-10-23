@@ -70,8 +70,6 @@ class FullyConnectedNeuralNetwork:
             errors_layers.append(errors_of_current_layer)
             layer_i = self.layers[i]
             updated_weight = self.weights[i] + (learning_rate * (layer_i.reshape(self.layers_size[i], 1) * errors_of_layer_above))
-            
-            ## print(self.layers[i]) to check whether the shape of the layers has changed. if it has, it is a problem. 
             updated_weights = [updated_weight] + updated_weights
         return updated_weights
 
@@ -129,14 +127,7 @@ def main():
     NN.create_layer(2500)
     NN.create_layer(1536)
     NN.create_layer(10)
-    # NN.weights_init()
-    # NN.feed_forward(train_data[0], results[0])
     NN.train(train_data, results, 0.00001, 9)
-    # for k in range(0, len(NN.weights)):
-    #     print(NN.weights[k])
-    #     savetxt(f"layer_{k}_to_layer_{k+1}_weights.csv", NN.weights[k], delimiter=',')
-    #     print("######################################################################################################")
-    #     print(loadtxt(f"layer_{k}_to_layer_{k+1}_weights.csv", delimiter=',')) 
 
 
 main()
