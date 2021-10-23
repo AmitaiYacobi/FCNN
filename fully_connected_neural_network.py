@@ -28,6 +28,7 @@ class FullyConnectedNeuralNetwork:
         layers_size = self.layers_size
         for i in range(0, self.number_of_layers - 1):
             weight = randn(layers_size[i], layers_size[i+1]) * sqrt(2 / layers_size[i])
+            print(weight.shape)
             self.weights.append(weight)
 
     def change_weights(self, new_weights):
@@ -58,7 +59,7 @@ class FullyConnectedNeuralNetwork:
         correct_output[target - 1] = 1
         error_output = correct_output - output_layer
         errors_layers.append(error_output)
-        for i in range(self.number_of_layers - 2, 0, -1):
+        for i in range(self.number_of_layers - 2, -1, -1):
             current_layer_without_activation = self.layers_without_activation_func[i]
             derivative_on_currnet_layer = np.vectorize(self.RelU_derivative)(current_layer_without_activation)
             errors_of_layer_above = errors_layers[self.number_of_layers - 2 - i]
@@ -69,8 +70,9 @@ class FullyConnectedNeuralNetwork:
             errors_layers.append(errors_of_current_layer)
             layer_i = self.layers[i]
             updated_weight = self.weights[i] + (learning_rate * (layer_i.reshape(self.layers_size[i], 1) * errors_of_layer_above))
+            
             ## print(self.layers[i]) to check whether the shape of the layers has changed. if it has, it is a problem. 
-            updated_weights.append(updated_weight)
+            updated_weights = [updated_weight] + updated_weights
         return updated_weights
 
     def train(self, train_data, targets, learning_rate, num_of_epochs=60):
@@ -85,12 +87,11 @@ class FullyConnectedNeuralNetwork:
                 new_weights = self.back_propagation(output_layer, targets[j], learning_rate)
                 self.change_weights(new_weights)
             epoch_accuracy = (self.counter / len(targets)) * 100
-            epoch_dir = f"epoch_{i}"
-            os.mkdir(epoch_dir)
+            os.mkdir(f"epoch_{i}")
             output_file.write(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
-            print(f"accuracy of epoch number {i} is: {epoch_accuracy}\n")
+            print(f"accuracy of epoch number {i} is: {epoch_accuracy}%\n")
             for k in range(0, len(self.weights)):
-                savetxt(f"{epoch_dir}\\layer_{k}_to_layer_{k+1}_weights.csv", self.weights[k], delimiter=',')
+                savetxt(f"epoch_{i}/layer_{k}_to_layer_{k+1}_weights.csv", self.weights[k], delimiter=',')
    
     def predict(self, validate_data, targets, epoch_dir):
         weights = []
@@ -130,7 +131,7 @@ def main():
     NN.create_layer(10)
     # NN.weights_init()
     # NN.feed_forward(train_data[0], results[0])
-    # NN.train(train_data, results, 0.00001, 9)
+    NN.train(train_data, results, 0.00001, 9)
     # for k in range(0, len(NN.weights)):
     #     print(NN.weights[k])
     #     savetxt(f"layer_{k}_to_layer_{k+1}_weights.csv", NN.weights[k], delimiter=',')
